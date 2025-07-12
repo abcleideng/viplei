@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <title>私家侦探</title>
+  <style>
+    body {
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(135deg,#23243a 0%,#1a1b2b 100%);
+      font-family: 'HarmonyOS Sans', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+      color:#f3f6fa;
+      letter-spacing:0.5px;
+    }
+    .container {
+      max-width:520px;
+      margin:0 auto;
+      padding:18px 8px 12px 8px;
+    }
+    .title {
+      font-size:26px;
+      font-weight:900;
+      margin-bottom:18px;
+      color:#fff;
+      letter-spacing:2px;
+      text-shadow:0 2px 16px #00eaff44,0 1px 0 #222;
+      text-align:center;
+      user-select:none;
+    }
+    .input-area {
+      margin-bottom:18px;
+      background:rgba(30,34,60,0.85);
+      border-radius:16px;
+      box-shadow:0 2px 16px #00eaff22;
+      padding:14px 10px 10px 10px;
+    }
+    .input-btns {
+      display:flex; gap:8px; margin-bottom:8px;
+    }
+    .parse-btn, .history-btn {
+      flex:1;
+      background:linear-gradient(90deg,#00eaff 0%,#0051ff 100%);
+      color:#fff; border:none; border-radius:8px;
+      padding:12px 0; font-size:17px; font-weight:700; cursor:pointer;
+      box-shadow:0 2px 12px #00eaff55;
+      letter-spacing:1px;
+      transition:.2s;
+    }
+    .parse-btn.active, .history-btn.active {
+      background:linear-gradient(90deg,#fff 0%,#00eaff 100%);
+      color:#0051ff;
+      border:2px solid #00eaff;
+      box-shadow:0 0 0 3px #00eaff99,0 2px 12px #00eaff77;
+    }
+    textarea {
+      width:100%; min-height:100px; border-radius:10px; border:none;
+      font-size:15px; padding:10px; resize:vertical; box-sizing:border-box;
+      background:rgba(36,38,60,0.95); color:#fff; outline:none;
+      font-family:inherit;
+      box-shadow:0 1px 6px #00eaff22 inset;
+      margin-bottom:8px;
+      transition:.2s;
+    }
+    textarea:focus { box-shadow:0 2px 12px #00eaff55 inset; }
+    .history-panel {
+      margin-bottom:10px;
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:10px 10px 8px 10px;
+    }
+    .history-title {
+      font-size:15px;
+      font-weight:700;
+      color:#00eaff;
+      margin-bottom:6px;
+      letter-spacing:1px;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .history-list {
+      display:flex; flex-wrap:wrap; gap:6px 10px;
+    }
+    .history-tag {
+      background:linear-gradient(90deg,#00eaff33 0%,#0051ff33 100%);
+      color:#fff; border-radius:8px; padding:2px 10px; font-size:13px; margin:2px 0;
+      box-shadow:0 1px 8px #00eaff33;
+      text-shadow:0 1px 4px #0051ff55;
+      font-weight:500;
+      letter-spacing:1px;
+      transition:.2s;
+      white-space:nowrap;
+    }
+    .quick-btns {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .quick-btn {
+      padding: 2px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(90deg,#00eaff 0%,#0051ff 100%);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: .15s;
+    }
+    .quick-btn:active {
+      background: linear-gradient(90deg,#0051ff 0%,#00eaff 100%);
+      color: #fff;
+    }
+    .grid49 {
+      display:grid; grid-template-columns:repeat(7,1fr); gap:10px;
+      margin-bottom:10px;
+    }
+    .num-block {
+      background:rgba(36,38,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff22,0 1px 2px #0004;
+      min-height:60px;
+      display:flex; flex-direction:column; align-items:center; position:relative;
+      transition:.2s;
+      padding:8px 4px 8px 4px;
+      overflow:hidden;
+    }
+    .num-btn {
+      width:38px; height:38px; border-radius:50%;
+      background:linear-gradient(135deg,#00eaff 0%,#0051ff 100%);
+      color:#fff; font-size:19px; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:4px; cursor:pointer; border:2px solid #00eaff;
+      box-shadow:0 2px 12px #00eaff55,0 1px 2px #0004;
+      user-select:none;
+      transition:.2s;
+      outline:none;
+      position:relative;
+      z-index:2;
+    }
+    .num-btn.active {
+      background:linear-gradient(135deg,#fff 0%,#00eaff 100%);
+      color:#0051ff;
+      border-color:#fff;
+      box-shadow:0 0 0 3px #00eaff99,0 2px 12px #00eaff77;
+      transform:scale(1.08);
+    }
+    .num-btn.red {
+      background:linear-gradient(135deg,#ff3b3b 0%,#ffb199 100%) !important;
+      color:#fff !important;
+      border-color:#fff !important;
+      box-shadow:0 0 0 3px #ff3b3b99,0 2px 12px #ffb19977 !important;
+    }
+    .user-list {
+      margin-top:2px; width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-start;
+      gap:4px 6px;
+      animation:fadeIn .4s;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(10px);}
+      to { opacity:1; transform:translateY(0);}
+    }
+    .user-tag {
+      background:linear-gradient(90deg,#00eaff33 0%,#0051ff33 100%);
+      color:#fff; border-radius:8px; padding:2px 7px; font-size:12px; margin:1px 0;
+      box-shadow:0 1px 8px #00eaff33;
+      text-shadow:0 1px 4px #0051ff55;
+      font-weight:500;
+      letter-spacing:0.5px;
+      transition:.2s;
+      white-space:nowrap;
+    }
+    .count {
+      font-size:13px; color:#00eaff; margin-bottom:2px; font-weight:700;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .detail-panel {
+      margin-top:18px;
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:14px 10px 10px 10px;
+    }
+    .detail-title {
+      font-size:16px;
+      font-weight:700;
+      color:#00eaff;
+      margin-bottom:10px;
+      letter-spacing:1px;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .detail-list {
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .detail-item {
+      color:#fff;
+      font-size:13px;
+      background:linear-gradient(90deg,#00eaff22 0%,#0051ff22 100%);
+      border-radius:7px;
+      padding:5px 10px;
+      word-break:break-all;
+      box-shadow:0 1px 4px #00eaff22;
+      letter-spacing:1px;
+    }
+    .stat-panel {
+      margin-top:18px;
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:14px 10px 10px 10px;
+    }
+    .stat-title {
+      font-size:16px;
+      font-weight:700;
+      color:#00eaff;
+      margin-bottom:10px;
+      letter-spacing:1px;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .stat-list {
+      font-size:13px;
+      color:#fff;
+      line-height:1.8;
+      word-break:break-all;
+    }
+    .detail-num.highlight-num {
+  background: #ff3b3b;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-weight: bold;
+}
+    @media (max-width: 400px) {
+      .container { padding:2px; }
+      .num-btn { width:28px; height:28px; font-size:15px;}
+      .user-tag, .history-tag { font-size:10px; padding:2px 5px;}
+      .quick-btn { font-size:11px; padding:2px 6px;}
+      .title { font-size:20px;}
+      .detail-title, .stat-title, .history-title { font-size:14px;}
+      .detail-item, .stat-list { font-size:11px; padding:3px 6px;}
+    }
+    .stat-panel table { font-family: monospace,Consolas,'SF Mono','Menlo',monospace; }
+.stat-panel th, .stat-panel td { text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">私家侦探</div>
+    <div id="codeTypePanel" style="margin-bottom:10px;text-align:center;">
+   <label style="margin-right:8px;"><input type="checkbox" class="code-type" value="1">1码</label>
+   <label style="margin-right:8px;"><input type="checkbox" class="code-type" value="2">2码</label>
+   <label style="margin-right:8px;"><input type="checkbox" class="code-type" value="3">3码</label>
+   <label style="margin-right:8px;"><input type="checkbox" class="code-type" value="4">4码</label>
+   <label style="margin-right:8px;"><input type="checkbox" class="code-type" value="8">8码</label>
+   <label style="margin-right:8px;"><input type="checkbox" class="code-type" value="12">12码</label>
+      <button id="intersectBtn" style="margin-left:16px;padding:2px 12px;border-radius:6px;background:#00eaff;color:#fff;border:none;cursor:pointer;">交集</button>
+    </div>
+      <div class="input-area">
+      <div class="input-btns">
+        <button class="parse-btn active" id="btnToday" onclick="onTodayClick()">解析数据</button>
+        <button class="history-btn" id="btnHistory" onclick="onHistoryClick()">历史开奖用户双击统计</button>
+      </div>
+      <textarea id="mainInput" placeholder="请粘贴数据"></textarea>
+      <div id="historyPanel"></div>
+    </div>
+    <div class="quick-btns" id="quickBtns"></div>
+    <div class="grid49" id="grid49"></div>
+    <div id="detailPanel"></div>
+    <div id="statPanel"></div>
+    <!-- 在statPanel后面加 -->
+  </div>
+  </div>
+<script>
+
+// 码型选择逻辑
+function getSelectedCodeLens() {
+  // 返回所有选中的码型长度（如[1,4,8,12]）
+  return Array.from(document.querySelectorAll('.code-type:checked')).map(function(e){return parseInt(e.value,10)}).sort(function(a,b){return a-b});
+}
+
+// 保证所有按钮事件绑定和初始化
+document.addEventListener('DOMContentLoaded', function() {
+  // 码型多选框
+  document.querySelectorAll('.code-type').forEach(function(cb){
+    cb.addEventListener('change', function(e) {
+      // 生成点击码型的数据日志
+      try {
+        const val = e.target.value;
+        const checked = e.target.checked;
+        console.log('[码型点击]', `码型:${val} ${checked ? '选中' : '取消'}`);
+      } catch(err) {}
+      parseAndRender();
+    });
+  });
+  // 交集按钮
+  var interBtn = document.getElementById('intersectBtn');
+  if (interBtn) interBtn.onclick = function() {
+    parseAndRender();
+  };
+  // 解析/历史按钮
+  var btnToday = document.getElementById('btnToday');
+  if (btnToday) btnToday.onclick = function() {
+    onTodayClick();
+    parseAndRender();
+  };
+  var btnHistory = document.getElementById('btnHistory');
+  if (btnHistory) btnHistory.onclick = function() {
+    onHistoryClick();
+    parseAndRender();
+  };
+  // 输入框输入时也刷新
+  var mainInput = document.getElementById('mainInput');
+  if (mainInput) mainInput.addEventListener('input', function() {
+    parseAndRender();
+  });
+});
+
+function getUserNumsByCodeType(u) {
+  var lens = getSelectedCodeLens();
+  if (lens.length === 0) return [];
+  // 如果同时勾选了3码、4码、8码、12码，特殊处理
+  if (
+    lens.includes(3) && lens.includes(4) && lens.includes(8) && lens.includes(12)
+  ) {
+    // 优先用4码、8码、12码的交集，顺序以4码为准，数量为3个
+    if (u.nums4 && u.nums4.length === 4 && u.nums8 && u.nums8.length === 8 && u.nums12 && u.nums12.length === 12) {
+      // 取4码的前3个，且这3个都在8码和12码中
+      let arr = [];
+      for (let i = 0; i < 4 && arr.length < 3; i++) {
+        let num = u.nums4[i];
+        if (u.nums8.includes(num) && u.nums12.includes(num)) {
+          arr.push(num);
+        }
+      }
+      return arr;
+    }
+    // 如果只有12码
+    if (u.nums12 && u.nums12.length >= 3) {
+      return u.nums12.slice(0, 3);
+    }
+    // 如果只有8码
+    if (u.nums8 && u.nums8.length >= 3) {
+      return u.nums8.slice(0, 3);
+    }
+    // 如果只有4码
+    if (u.nums4 && u.nums4.length >= 3) {
+      return u.nums4.slice(0, 3);
+    }
+    // 自动拆分
+    if (u.nums && u.nums.length >= 3) return u.nums.slice(0, 3);
+    return [];
+  }
+
+  // 其它情况，保持原有逻辑
+  var minLen = Math.min.apply(null, lens);
+  let arrs = lens.map(function(len){
+    if (len === 12 && u.nums12 && u.nums12.length === 12) return u.nums12;
+    if (len === 8 && u.nums8 && u.nums8.length === 8) return u.nums8;
+    if (len === 4 && u.nums4 && u.nums4.length === 4) return u.nums4;
+    if (len === 3 && u.nums3 && u.nums3.length === 3) return u.nums3;
+    if (len === 2 && u.nums2 && u.nums2.length === 2) return u.nums2;
+    if (len === 1 && u.nums1 && u.nums1.length === 1) return u.nums1;
+    if (u.nums && u.nums.length >= len) return u.nums.slice(0, len);
+    return [];
+  });
+  var intersection = arrs.reduce(function(a, b){
+    return a.filter(function(x){ return b.includes(x); });
+  });
+  let minArr = arrs[0] || [];
+  var result = [];
+  for (var i = 0; i < minArr.length; i++) {
+    var num = minArr[i];
+    if (intersection.includes(num)) {
+      result.push(num);
+    }
+  }
+  return result;
+}
+
+// 监听码型选择变化，刷新所有统计
+document.addEventListener('DOMContentLoaded',function(){
+  // 码型选择变动时，统一调用 parseAndRender，保证所有统计面板和数据同步刷新
+  document.querySelectorAll('.code-type').forEach(function(cb){
+    cb.addEventListener('change', function() {
+      parseAndRender();
+    });
+  });
+document.getElementById('intersectBtn').onclick = function() {
+  var lens = getSelectedCodeLens();
+  if (lens.length === 0) {
+    alert('请先选择码型！');
+    return;
+  }
+  var labelMap = {1:'1码',4:'4码',8:'8码',12:'12码'};
+  var msg = '已触发交集统计，当前选择码型：' + lens.map(function(l){return labelMap[l]||l+'码'}).join('、');
+  alert(msg);
+};
+});
+
+const NUM_SHENGXIAO_MAP = {
+  "01": "蛇", "13": "蛇", "25": "蛇", "37": "蛇", "49": "蛇",
+  "07": "猪", "19": "猪", "31": "猪", "43": "猪",
+  "02": "龙", "14": "龙", "26": "龙", "38": "龙",
+  "08": "狗", "20": "狗", "32": "狗", "44": "狗",
+  "03": "兔", "15": "兔", "27": "兔", "39": "兔",
+  "09": "鸡", "21": "鸡", "33": "鸡", "45": "鸡",
+  "04": "虎", "16": "虎", "28": "虎", "40": "虎",
+  "10": "猴", "22": "猴", "34": "猴", "46": "猴",
+  "05": "牛", "17": "牛", "29": "牛", "41": "牛",
+  "11": "羊", "23": "羊", "35": "羊", "47": "羊",
+  "06": "鼠", "18": "鼠", "30": "鼠", "42": "鼠",
+  "12": "马", "24": "马", "36": "马", "48": "马"
+};
+let users = [];
+let numUserMap = {};
+let activeNums = {};
+let mode = 'today'; // 'today' or 'history'
+let todayInput = '';
+let historyInput = '';
+let todayUsers = [];
+let todayNumUserMap = {};
+
+
+
+function onTodayClick() {
+  mode = 'today';
+  document.getElementById('btnToday').classList.add('active');
+  document.getElementById('btnHistory').classList.remove('active');
+  document.getElementById('historyPanel').style.display = 'none';
+  document.getElementById('mainInput').value = todayInput;
+  parseAndRender();
+}
+function onHistoryClick() {
+  mode = 'history';
+  document.getElementById('btnToday').classList.remove('active');
+  document.getElementById('btnHistory').classList.add('active');
+  document.getElementById('historyPanel').style.display = '';
+  document.getElementById('mainInput').value = historyInput;
+  parseHistoryUsersAndAutoSelect();
+}
+
+function parseUserData(raw) {
+  // 先去掉所有网址，按网址分块
+  let blocks = raw.split(/https?:\/\/t\.me\/[^\s]+/g);
+  const users = [];
+  for (let block of blocks) {
+    let lines = block.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    let i = 0;
+    while (i < lines.length) {
+      // 只认带逗号和日期的行为用户名（支持表情和特殊字符）
+      let m = lines[i].match(/^(.+?)[,，:：\s]*\[\d{4}[年\/\-\.]\d{1,2}[月\/\-\.]\d{1,2}/);
+      let name = null;
+      let userLines = [];
+      if (m) {
+        name = m[1].trim();
+        userLines = [lines[i]];
+        i++;
+        // 收集到下一个用户名或块结束
+        while (
+          i < lines.length &&
+          !lines[i].match(/^(.+?)[,，:：\s]*\[\d{4}[年\/\-\.]\d{1,2}[月\/\-\.]\d{1,2}/)
+        ) {
+          userLines.push(lines[i]);
+          i++;
+        }
+      } else {
+        // 兼容“新澳门190期...”或“190期新澳...”等一行直接给号码的格式
+        let m2 = lines[i].match(/^(.{1,12})[,，:：\s]*(新澳|新澳门|新奥|新澳門)?\d{2,3}期[：:：\s\-]*([\d\.\-,，、;；\s]+)/i);
+        if (m2) {
+          name = m2[1].trim();
+          userLines = [lines[i]];
+          i++;
+        } else {
+          let m3 = lines[i].match(/^(\d{2,3}期)?(新澳|新澳门|新奥|新澳門)[：:：\s\-]*([\d\.\-,，、;；\s]+)/i);
+          if (m3) {
+            name = '';
+            userLines = [lines[i]];
+            i++;
+          } else {
+            i++;
+            continue;
+          }
+        }
+      }
+      // 去掉每行中的日期和时间
+      userLines = userLines.map(line =>
+        line
+          .replace(/(\[?\d{4}[年\/\-\.]\d{1,2}[月\/\-\.]\d{1,2}[日号]?(\s+\d{1,2}:\d{2})?\]?)/g, '')
+          .replace(/\b\d{1,2}:\d{2}\b/g, '')
+      );
+      let blockText = userLines.join('\n');
+      let nums12 = [], nums8 = [], nums4 = [], nums3 = [], nums2 = [], nums1 = [];
+      // 识别12码
+      let m12 = blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:12|十二)[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:12|十二)[\s]*码(\d[\d\-—_·,，.．、;；\s]*)/i)
+        || blockText.match(/12[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/十二[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i);
+      if (m12) {
+        let numStr = m12[1];
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums12 = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49)
+          .slice(0, 12);
+      }
+      // 识别8码
+      let m8 = blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:8|八)[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:8|八)[\s]*码(\d[\d\-—_·,，.．、;；\s]*)/i)
+        || blockText.match(/8[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/八[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i);
+      if (m8) {
+        let numStr = m8[1];
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums8 = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49)
+          .slice(0, 8);
+      }
+      // 识别4码
+      let m4 = blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:4|四)[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:4|四)[\s]*码(\d[\d\-—_·,，.．、;；\s]*)/i)
+        || blockText.match(/4[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/四[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i);
+      if (m4) {
+        let numStr = m4[1];
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums4 = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49)
+          .slice(0, 4);
+      }
+      // 识别3码
+      let m3 = blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:3|三)[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:3|三)[\s]*码(\d[\d\-—_·,，.．、;；\s]*)/i)
+        || blockText.match(/3[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/三[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i);
+      if (m3) {
+        let numStr = m3[1];
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums3 = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49)
+          .slice(0, 3);
+      }
+      // 识别2码
+      let m2 = blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:2|二)[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:2|二)[\s]*码(\d[\d\-—_·,，.．、;；\s]*)/i)
+        || blockText.match(/2[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/二[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i);
+      if (m2) {
+        let numStr = m2[1];
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums2 = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49)
+          .slice(0, 2);
+      }
+      // 识别1码
+      let m1 = blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:1|一)[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/(?:新澳(?:门|門)?|新澳门|新澳門)?\s*(?:1|一)[\s]*码(\d[\d\-—_·,，.．、;；\s]*)/i)
+        || blockText.match(/1[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i)
+        || blockText.match(/一[\s]*码[：:，, ]*([\d\-—_·,，.．、;；\s]+)/i);
+      if (m1) {
+        let numStr = m1[1];
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums1 = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49)
+          .slice(0, 1);
+      }
+      // 兼容“新澳门190期...”或“190期新澳...”等一行直接给号码的格式
+      if (!nums12.length && !nums8.length && !nums4.length && !nums3.length && !nums2.length && !nums1.length) {
+        let numStr = blockText.replace(/[^\d,，.．、;；\-—_·`'\"\/\\\s]/g,'');
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        let allNums = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49);
+        nums12 = allNums.slice(0, 12);
+        nums8 = allNums.slice(0, 8);
+        nums4 = allNums.slice(0, 4);
+        nums3 = allNums.slice(0, 3);
+        nums2 = allNums.slice(0, 2);
+        nums1 = allNums.slice(0, 1);
+      }
+      // 存储所有码型
+      if (nums12.length + nums8.length + nums4.length + nums3.length + nums2.length + nums1.length === 0) continue;
+      users.push({
+        name,
+        nums12,
+        nums8,
+        nums4,
+        nums3,
+        nums2,
+        nums1,
+        nums: nums12.length ? nums12 : (nums8.length ? nums8 : (nums4.length ? nums4 : (nums3.length ? nums3 : (nums2.length ? nums2 : nums1))))
+      });
+    }
+  }
+  // 去重且保留顺序
+  const seen = new Set();
+  const result = [];
+  users.forEach(u => {
+    let key = (u.name || '') + (u.nums12 || []).join(',') + (u.nums8 || []).join(',') + (u.nums4 || []).join(',') + (u.nums3 || []).join(',') + (u.nums2 || []).join(',') + (u.nums1 || []).join(',');
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(u);
+    }
+  });
+  return result;
+}
+function getUserNumsByCodeType(u) {
+  var lens = getSelectedCodeLens();
+  if (lens.length === 0) return [];
+  // 如果同时勾选了3码、4码、8码、12码，特殊处理
+  if (
+    lens.includes(3) && lens.includes(4) && lens.includes(8) && lens.includes(12)
+  ) {
+    // 优先用4码、8码、12码的交集，顺序以4码为准，数量为3个
+    if (u.nums4 && u.nums4.length === 4 && u.nums8 && u.nums8.length === 8 && u.nums12 && u.nums12.length === 12) {
+      // 取4码的前3个，且这3个都在8码和12码中
+      let arr = [];
+      for (let i = 0; i < 4 && arr.length < 3; i++) {
+        let num = u.nums4[i];
+        if (u.nums8.includes(num) && u.nums12.includes(num)) {
+          arr.push(num);
+        }
+      }
+      return arr;
+    }
+    // 如果只有12码
+    if (u.nums12 && u.nums12.length >= 3) {
+      return u.nums12.slice(0, 3);
+    }
+    // 如果只有8码
+    if (u.nums8 && u.nums8.length >= 3) {
+      return u.nums8.slice(0, 3);
+    }
+    // 如果只有4码
+    if (u.nums4 && u.nums4.length >= 3) {
+      return u.nums4.slice(0, 3);
+    }
+    // 自动拆分
+    if (u.nums && u.nums.length >= 3) return u.nums.slice(0, 3);
+    return [];
+  }
+
+  // 其它情况，保持原有逻辑
+  var minLen = Math.min.apply(null, lens);
+  let arrs = lens.map(function(len){
+    if (len === 12 && u.nums12 && u.nums12.length === 12) return u.nums12;
+    if (len === 8 && u.nums8 && u.nums8.length === 8) return u.nums8;
+    if (len === 4 && u.nums4 && u.nums4.length === 4) return u.nums4;
+    if (len === 3 && u.nums3 && u.nums3.length === 3) return u.nums3;
+    if (len === 2 && u.nums2 && u.nums2.length === 2) return u.nums2;
+    if (len === 1 && u.nums1 && u.nums1.length === 1) return u.nums1;
+    if (u.nums && u.nums.length >= len) return u.nums.slice(0, len);
+    return [];
+  });
+  var intersection = arrs.reduce(function(a, b){
+    return a.filter(function(x){ return b.includes(x); });
+  });
+  let minArr = arrs[0] || [];
+  var result = [];
+  for (var i = 0; i < minArr.length; i++) {
+    var num = minArr[i];
+    if (intersection.includes(num)) {
+      result.push(num);
+    }
+  }
+  return result;
+}
+function buildNumUserMap(users) {
+  const map = {};
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    map[num] = [];
+  }
+  users.forEach(u => {
+    u.nums.forEach(num => {
+      if (map[num] && u.name) map[num].push(u.name);
+    });
+  });
+  for (let k in map) {
+    map[k] = Array.from(new Set(map[k]));
+  }
+  return map;
+}
+
+// 历史记录用户名提取与自动勾选，只统计历史用户
+function parseHistoryUsersAndAutoSelect() {
+  const raw = document.getElementById('mainInput').value;
+  const lines = raw.split('\n');
+  const names = [];
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    let m = line.match(/^(.+?),\s*\[\d{4}\/\d{1,2}\/\d{1,2}\/?.*?\d{1,2}:\d{2}\]/);
+    if (m) { names.push(m[1].trim()); continue; }
+    let m2 = line.match(/^(.+?),\s*\[\d{4}\/\d{1,2}\/\d{1,2}.*?\d{1,2}:\d{2}\]/);
+    if (m2) { names.push(m2[1].trim()); continue; }
+  }
+  const uniqueNames = Array.from(new Set(names)).filter(Boolean);
+  const nameSet = new Set(uniqueNames);
+
+  // 渲染用户名
+  const panel = document.getElementById('historyPanel');
+  if (uniqueNames.length === 0) {
+    panel.innerHTML = '<div style="color:#888;font-size:13px;">未识别到用户名</div>';
+  } else {
+    let html = `<div class="history-panel">
+      <div class="history-title">历史记录用户名（共${uniqueNames.length}个）</div>
+      <div class="history-list">`;
+    uniqueNames.forEach(name => {
+      html += `<span class="history-tag">${name}</span>`;
+    });
+    html += `</div></div>`;
+    panel.innerHTML = html;
+  }
+
+  // 自动勾选这些用户在最新数据中的数字
+  activeNums = {};
+  let baseUsers = window._allTodayUsers || todayUsers;
+  users = baseUsers.filter(u => nameSet.has(u.name));
+  let numsSet = new Set();
+  users.forEach(u => {
+    u.nums.forEach(num => numsSet.add(num));
+  });
+  numsSet.forEach(num => activeNums[num] = true);
+  numUserMap = buildNumUserMap(users);
+
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+}
+
+
+function getSelectedUsersDetail() {
+  // 保证顺序和 users 一致，且号码按码型过滤
+  return users.filter(u =>
+    getUserNumsByCodeType(u).some(num => activeNums[num])
+  );
+}
+
+function getSelectedNumsStat(selectedUsers) {
+  const stat = {};
+  for (let i = 1; i <= 49; i++) stat[i.toString().padStart(2, '0')] = 0;
+  selectedUsers.forEach(u => {
+    u.nums.forEach(num => {
+      if (stat[num] !== undefined) stat[num]++;
+    });
+  });
+  const group = {};
+  Object.entries(stat).forEach(([num, count]) => {
+    if (!group[count]) group[count] = [];
+    group[count].push(num);
+  });
+  const sorted = Object.entries(group)
+    .filter(([count, arr]) => arr.length > 0)
+    .sort((a, b) => b[0] - a[0]);
+  return sorted;
+}
+
+function renderQuickBtns() {
+  const quickBtns = document.getElementById('quickBtns');
+  let html = '';
+  if (mode === 'today') {
+    html = `
+      <button class="quick-btn" onclick="selectAllNums()">全勾选</button>
+      <button class="quick-btn" onclick="unselectAllNums()">全不选</button>
+    `;
+  } else if (mode === 'history') {
+    html = `
+      <button class="quick-btn" onclick="selectAllHistoryNums()">全勾选</button>
+      <button class="quick-btn" onclick="unselectAllHistoryNums()">全不选</button>
+    `;
+  }
+  quickBtns.innerHTML = html;
+}
+function selectAllNums() {
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    activeNums[num] = true;
+  }
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+function unselectAllNums() {
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+function selectAllHistoryNums() {
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    if ((numUserMap[num]||[]).length > 0) activeNums[num] = true;
+  }
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+function unselectAllHistoryNums() {
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+
+function renderGrid49() {
+  renderQuickBtns();
+  const grid = document.getElementById('grid49');
+  grid.innerHTML = '';
+  // 统计每个号码在当前码型下出现的用户
+  let userMap = {};
+  for (let i = 1; i <= 49; i++) userMap[i.toString().padStart(2, '0')] = [];
+  users.forEach(u => {
+    getUserNumsByCodeType(u).forEach(num => {
+      if (userMap[num]) userMap[num].push(u.name);
+    });
+  });
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    let block = document.createElement('div');
+    block.className = 'num-block';
+    let btnClass = 'num-btn';
+    if (activeNums[num]) {
+      btnClass += ' active';
+      if (mode === 'history') btnClass += ' red';
+    }
+    let btn = document.createElement('div');
+    btn.className = btnClass;
+    btn.innerText = num;
+    btn.onclick = function() {
+      activeNums[num] = !activeNums[num];
+      renderGrid49();
+      renderDetailPanel();
+      renderStatPanel();
+    };
+    block.appendChild(btn);
+    let userList = userMap[num] || [];
+    let count = document.createElement('div');
+    count.className = 'count';
+    count.innerText = userList.length + '人';
+    block.appendChild(count);
+    if (activeNums[num]) {
+      let ul = document.createElement('div');
+      ul.className = 'user-list';
+      userList.forEach(name => {
+        let tag = document.createElement('span');
+        tag.className = 'user-tag';
+        tag.innerText = name;
+        ul.appendChild(tag);
+      });
+      block.appendChild(ul);
+    }
+    grid.appendChild(block);
+  }
+}
+let highlightedNum = null;
+if (!window.streakCardUnhighlightNums) window.streakCardUnhighlightNums = [];
+if (!window.patternCardUnhighlightNums) window.patternCardUnhighlightNums = [];
+
+// 检查某数字是否在所有用户顺序中，存在一段连续区间，正好有 groupCount 组“2有1无”模式
+function isPatternNum(selectedUsers, num, groupCount = 5) {
+  let arr = selectedUsers.map(u => u.nums.slice(0, 12).includes(num) ? 1 : 0);
+  let needLen = groupCount * 3; // 5组就是15人
+  for (let i = 0; i <= arr.length - needLen; i++) {
+    let ok = true;
+    for (let g = 0; g < groupCount; g++) {
+      let base = i + g * 3;
+      if (!(arr[base] === 1 && arr[base + 1] === 1 && arr[base + 2] === 0)) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return true;
+  }
+  return false;
+}
+
+function renderDetailPanel() {
+  const detailPanel = document.getElementById('detailPanel');
+
+  const selectedUsers = getSelectedUsersDetail();
+  if (selectedUsers.length === 0) {
+    detailPanel.innerHTML = '';
+    return;
+  }
+
+  // 连续5人以上共现数字（按码型）
+  let streakNums = [];
+  for (let n = 1; n <= 49; n++) {
+    let num = n.toString().padStart(2, '0');
+    let streak = 0;
+    for (let i = 0; i < selectedUsers.length; i++) {
+      let u = selectedUsers[i];
+      if (getUserNumsByCodeType(u).includes(num)) {
+        streak++;
+      } else {
+        if (streak >= 5) streakNums.push(num);
+        streak = 0;
+      }
+    }
+    if (streak >= 5) streakNums.push(num);
+  }
+  streakNums = Array.from(new Set(streakNums));
+  let unhighlightNums = window.streakCardUnhighlightNums;
+
+  // streak 卡片
+  let cardHtml = `
+    <div id="streakCardBox" style="margin-bottom:6px;text-align:left;">
+      <span style="
+        display:inline-block;
+        background:linear-gradient(90deg,#a259ff 0%,#43e97b 100%);
+        border-radius:7px;padding:2px 10px;
+        color:#fff;font-size:12px;font-weight:600;
+        margin-bottom:2px;box-shadow:0 1px 2px #a259ff22;
+        letter-spacing:1px;line-height:1.2;
+      ">连续5人以上共现数字</span>
+      <div id="streakNums" style="margin-top:2px;display:flex;flex-wrap:wrap;gap:2px;">
+        ${
+          streakNums.length > 0
+          ? streakNums.map(num => {
+              let isUnhighlight = unhighlightNums.includes(num);
+              return `<span class="streak-num-btn" data-num="${num}" style="
+                display:inline-block;cursor:pointer;
+                background:linear-gradient(90deg,#a259ff 0%,#43e97b 100%);
+                color:#fff;border-radius:4px;padding:1px 6px;
+                font-weight:bold;font-size:11px;
+                border:${isUnhighlight ? '2px solid #888' : '2px solid #fff'};
+                opacity:${isUnhighlight ? 0.3 : 1};
+                box-shadow:${isUnhighlight ? 'none' : '0 0 4px #43e97b'};
+                margin:0;
+                transition:all .15s;">
+                ${num}
+              </span>`;
+            }).join('')
+          : ''
+        }
+      </div>
+    </div>
+  `;
+
+  // 统计有高亮数字的用户数
+  let highlightCount = 0;
+  if (highlightedNum) {
+    selectedUsers.forEach(u => {
+      if (getUserNumsByCodeType(u).includes(highlightedNum)) highlightCount++;
+    });
+  }
+
+  // ----------- 动态统计无高亮用户数字 -----------
+  const highlightSet = new Set(streakNums);
+  let noHighlightUsers = selectedUsers.filter(u =>
+    getUserNumsByCodeType(u).every(num => !highlightSet.has(num))
+  );
+  let numCount = {};
+  for (let n = 1; n <= 49; n++) {
+    numCount[n.toString().padStart(2, '0')] = 0;
+  }
+  noHighlightUsers.forEach(u => {
+    getUserNumsByCodeType(u).forEach(num => {
+      if (numCount[num] !== undefined) numCount[num]++;
+    });
+  });
+  let countMap = {};
+  Object.entries(numCount).forEach(([num, count]) => {
+    if (!countMap[count]) countMap[count] = [];
+    countMap[count].push(num);
+  });
+  let countList = Object.keys(countMap).map(Number).sort((a, b) => b - a);
+  let statHtml = '';
+  if (noHighlightUsers.length > 0) {
+    statHtml += `<div style="margin:12px 0 0 0;padding:10px 14px;background:linear-gradient(90deg,#23272e 0%,#1a1d23 100%);border-radius:8px;color:#eaf6ff;font-size:15px;line-height:1.8;">
+      <b>没有任何高亮的用户（共${noHighlightUsers.length}人）数字统计：</b><br>`;
+    countList.forEach(cnt => {
+      // 过滤掉高亮数字
+      let nums = countMap[cnt]
+        .filter(num => !highlightSet.has(num))
+        .sort((a, b) => Number(a) - Number(b));
+      if (nums.length > 0) {
+        statHtml += `〖${cnt}次〗<span style="color:#fff;">${nums.join(' ')}</span>（共计${nums.length}个）<br>`;
+      }
+    });
+    statHtml += `</div>`;
+  }
+
+// ----------- 渲染 -----------
+let html = cardHtml + `<div class="detail-panel">
+  <div class="detail-title" style="font-size:13px;">选中数字下所有用户的原始数据`
+  + (highlightedNum ? `（高亮数字 <span style='color:#ff3b3b;font-weight:bold;'>${highlightedNum}</span>，共${highlightCount}人）` : '')
+  + `</div><div class="detail-list">`;
+let allSum = 0;
+selectedUsers.forEach((u, idx) => {
+  // 码型下号码
+  let nums = [];
+  let seen = new Set();
+  getUserNumsByCodeType(u).forEach(num => {
+    let numStr = num.toString().padStart(2, '0');
+    if (!seen.has(numStr)) {
+      seen.add(numStr);
+      nums.push(numStr);
+    }
+  });
+  let sum = nums.reduce((a, b) => a + Number(b), 0);
+  allSum += sum;
+  // 用户名
+  html += `<div class="detail-item" style="font-size:12px;padding:3px 4px;">
+    <span style="color:#00eaff;font-weight:bold;margin-right:6px;">${idx + 1}.</span>${u.name}：<br>`;
+  // 码型一行，等宽字体，宽度对齐，数字两位，中央对齐
+  html += `<div style="display:flex;gap:0;margin:2px 0 0 0;">`;
+  nums.forEach((numStr, i) => {
+    let cls = 'detail-num';
+    let style = "display:flex;flex-direction:column;align-items:center;justify-content:center;width:44px;";
+    if (streakNums.includes(numStr) && !unhighlightNums.includes(numStr)) {
+      cls += ' highlight-num';
+    }
+    if (highlightedNum === numStr) {
+      style += "color:#ff3b3b;font-weight:bold;background:#fff2;";
+    }
+    html += `<span style="${style}">
+      <span class="${cls}" data-num="${numStr}" style="font-family:monospace,Consolas,'SF Mono','Menlo',monospace;font-size:15px;text-align:center;cursor:pointer;display:block;width:100%;">${numStr}</span>
+      <span style="font-family:monospace,Consolas,'SF Mono','Menlo',monospace;font-size:11px;color:#888;text-align:center;display:block;width:100%;">位置${i+1}</span>
+    </span>`;
+  });
+  html += `</div></div>`;
+});
+html += `</div>
+  <div style="margin-top:6px;color:#00eaff;font-weight:bold;font-size:12px;">所有用户号码总和：${allSum}</div>
+  ${statHtml}
+`;
+detailPanel.innerHTML = html;
+
+  // 绑定 streak 卡片下数字点击事件
+  document.querySelectorAll('.streak-num-btn').forEach(el => {
+    el.onclick = function(e) {
+      let num = this.getAttribute('data-num');
+      let idx = window.streakCardUnhighlightNums.indexOf(num);
+      if (idx === -1) {
+        window.streakCardUnhighlightNums.push(num);
+      } else {
+        window.streakCardUnhighlightNums.splice(idx, 1);
+      }
+      renderDetailPanel();
+      e.stopPropagation();
+    };
+  });
+
+  // 绑定点击数字高亮事件
+  document.querySelectorAll('.detail-num').forEach(el => {
+    el.onclick = function() {
+      let num = this.getAttribute('data-num');
+      if (highlightedNum === num) {
+        highlightedNum = null;
+      } else {
+        highlightedNum = num;
+      }
+      renderDetailPanel();
+    };
+  });
+}
+// 只保留唯一动态统计面板，所有统计内容集成于此，随码型和数字选择动态刷新
+function renderStatPanel() {
+  const statPanel = document.getElementById('statPanel');
+  const selectedUsers = getSelectedUsersDetail();
+  if (selectedUsers.length === 0) {
+    statPanel.innerHTML = '';
+    return;
+  }
+  // 获取当前码型（只取最小码型）
+  const lens = getSelectedCodeLens();
+  if (!lens.length) {
+    statPanel.innerHTML = '<div class="stat-title">请先选择码型</div>';
+    return;
+  }
+  const minLen = lens[0];
+  // 只统计前minLen位的相邻对
+  let html = `<div class="stat-panel">
+    <div class="stat-title" style="color:#ffb300;">${minLen}码每对相邻位置共同出现的数字（交集）</div>
+    <div class="stat-list">`;
+  // ...existing code...
+  // ...existing code...
+  // 统计每对相邻位置“所有用户该位置的交集”，并逐对展示
+  // 生肖、尾数、交集等统计变量只声明一次
+  const allSxList = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+  let allSx = [];
+  let allTailNums = [];
+  let allIntersectionNums = [];
+  let intersectionArr = [];
+  for (let i = 0; i < minLen - 1; i++) {
+    let posA = [], posB = [];
+    selectedUsers.forEach(u => {
+      if (u.nums[i]) posA.push(u.nums[i]);
+      if (u.nums[i+1]) posB.push(u.nums[i+1]);
+    });
+    let setA = new Set(posA);
+    let setB = new Set(posB);
+    let intersection = Array.from(setA).filter(x => setB.has(x));
+    intersection.sort((a, b) => Number(a) - Number(b));
+    intersectionArr.push(intersection);
+    allIntersectionNums = allIntersectionNums.concat(intersection);
+    html += `<div style=\"margin-bottom:8px;\"><b>第${i+1}位-第${i+2}位：</b><br>`;
+    if (intersection.length > 0) {
+      html += intersection.map(num => `<span style=\"display:inline-block;width:36px;text-align:center;\">${num}</span>`).join('');
+      html += '<br>';
+      html += intersection.map(num => {
+        let sx = NUM_SHENGXIAO_MAP[num]||'';
+        return `<span style=\"display:inline-block;width:36px;text-align:center;color:#00eaff;\">${sx}</span>`;
+      }).join('');
+      html += '<br>';
+      // 该对交集数字对应生肖出现次数分组统计（补全0次生肖）
+      let sxCount = {};
+      allSxList.forEach(sx => sxCount[sx] = 0);
+      intersection.forEach(num => {
+        let sx = NUM_SHENGXIAO_MAP[num]||'';
+        if (sx) sxCount[sx] = (sxCount[sx]||0)+1;
+      });
+      let sxGroup = {};
+      Object.entries(sxCount).forEach(([sx, cnt]) => {
+        if (!sxGroup[cnt]) sxGroup[cnt]=[];
+        sxGroup[cnt].push(sx);
+      });
+      let sxKeys = Object.keys(sxGroup).map(Number).sort((a,b)=>b-a);
+      html += `<div style='color:#19e06e;font-size:13px;margin:2px 0 4px 0;'>`;
+      sxKeys.forEach(cnt => {
+        let arr = sxGroup[cnt].sort();
+        if (cnt > 0) {
+          html += `〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）<br>`;
+        }
+      });
+      if (sxGroup[0] && sxGroup[0].length > 0) {
+        html += `〖0次〗${sxGroup[0].sort().join(' ')}（共计${sxGroup[0].length}个）<br>`;
+      }
+      html += `</div>`;
+    } else {
+      html += `<span style='color:#888;'>无交集</span><br>`;
+    }
+    html += `</div>`;
+    allSx = allSx.concat(intersection.map(num => NUM_SHENGXIAO_MAP[num]||''));
+    allTailNums = allTailNums.concat(intersection);
+  }
+
+  // 所有对交集生肖单独统计（每个生肖单独一行）只插入一次
+  if (minLen > 1) {
+    let sxSingleCount = {};
+    allSxList.forEach(sx => sxSingleCount[sx] = 0);
+    intersectionArr.forEach(intersection => {
+      intersection.forEach(num => {
+        let sx = NUM_SHENGXIAO_MAP[num]||'';
+        if (sx) sxSingleCount[sx]++;
+      });
+    });
+    // 分组统计格式化输出
+    let group = {};
+    Object.entries(sxSingleCount).forEach(([sx, cnt]) => {
+      if (!group[cnt]) group[cnt] = [];
+      group[cnt].push(sx);
+    });
+    let sorted = Object.entries(group).sort((a, b) => b[0] - a[0]);
+    html += `<div style='color:#ffb300;margin:10px 0 0 0;'>所有对交集生肖单独统计</div><div class='stat-list'>`;
+    sorted.forEach(([cnt, arr]) => {
+      arr = arr.sort();
+      html += `〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）<br>`;
+    });
+    html += `</div>`;
+  }
+  // ...已在前面声明，无需重复声明...
+
+  // 新增：所有交集数字出现次数（去重）分组统计
+  let uniqueNums = Array.from(new Set(allIntersectionNums));
+  let numCount = {};
+  uniqueNums.forEach(num => {
+    numCount[num] = 0;
+    intersectionArr.forEach(arr => {
+      if (arr.includes(num)) numCount[num]++;
+    });
+  });
+  // 统计0次的数字（即所有交集中未出现的数字）
+  let allPossibleNums = [];
+  for (let n = 1; n <= 49; n++) allPossibleNums.push(n.toString().padStart(2, '0'));
+  let zeroNums_intersection = allPossibleNums.filter(num => !uniqueNums.includes(num));
+  zeroNums_intersection.forEach(num => { numCount[num] = 0; });
+  // 分组
+  let group = {};
+  Object.entries(numCount).forEach(([num, cnt]) => {
+    if (!group[cnt]) group[cnt] = [];
+    group[cnt].push(num);
+  });
+  let sorted = Object.entries(group).sort((a, b) => b[0] - a[0]);
+  html += `<div style='color:#ffb300;margin:10px 0 0 0;'>所有交集数字出现次数统计</div><div class='stat-list'>`;
+  sorted.forEach(([cnt, arr]) => {
+    arr = arr.sort((a, b) => Number(a) - Number(b));
+    html += `〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）<br>`;
+  });
+  html += `</div>`;
+  // 未出现生肖统计
+  let sxSet = new Set(allSx);
+  let notAppear = allSxList.filter(sx => !sxSet.has(sx));
+  if (notAppear.length > 0) {
+    html += `<div style='color:#ffb300;margin-top:8px;'>未出现生肖：${notAppear.join(' ')}</div>`;
+    // 统计未出现生肖在所有用户前minLen码中出现的次数
+    let sxCount = {};
+    notAppear.forEach(sx => sxCount[sx] = 0);
+    selectedUsers.forEach(u => {
+      u.nums.slice(0, minLen).forEach(num => {
+        let sx = NUM_SHENGXIAO_MAP[num];
+        if (sx && sxCount[sx] !== undefined) sxCount[sx]++;
+      });
+    });
+    // 分组
+    let group = {};
+    Object.entries(sxCount).forEach(([sx, cnt]) => {
+      if (!group[cnt]) group[cnt] = [];
+      group[cnt].push(sx);
+    });
+    let sorted = Object.entries(group).sort((a, b) => b[0] - a[0]);
+    html += `<div style="margin:2px 0 8px 0;font-size:13px;">`;
+    sorted.forEach(([cnt, arr]) => {
+      html += `<span style="color:#ffb300;">〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）</span><br>`;
+    });
+    html += `</div>`;
+  }
+  // 尾数分组统计（每个号码出现次数相加，作为该尾数总次数）
+  // 1. 统计每个号码出现次数
+  let numCountMap = {};
+  allTailNums.forEach(num => {
+    numCountMap[num] = (numCountMap[num]||0)+1;
+  });
+  // 2. 按尾数分组，统计每个尾数下所有号码出现次数之和
+  let tailNumMap = {};
+  Object.keys(numCountMap).forEach(num => {
+    let tail = num.length === 2 ? num[1] : String(num).slice(-1);
+    if (!tailNumMap[tail]) tailNumMap[tail] = { total: 0, nums: [] };
+    tailNumMap[tail].total += numCountMap[num];
+    tailNumMap[tail].nums.push({ num, count: numCountMap[num] });
+  });
+  // 3. 按总次数分组
+  let tailGroup = {};
+  Object.entries(tailNumMap).forEach(([tail, obj]) => {
+    let cnt = obj.total;
+    if (!tailGroup[cnt]) tailGroup[cnt]=[];
+    tailGroup[cnt].push({ tail, nums: obj.nums });
+  });
+  let tailKeys = Object.keys(tailGroup).map(Number).sort((a,b)=>b-a);
+  if (tailKeys.length > 0) {
+    html += `<div style='color:#19e06e;margin-top:8px;'>尾数分组总次数统计</div><div class='stat-list'>`;
+    tailKeys.forEach(cnt => {
+      let arr = tailGroup[cnt].sort((a,b)=>a.tail-b.tail);
+      arr.forEach(({tail, nums}) => {
+        // 按号码升序
+        nums.sort((a,b)=>Number(a.num)-Number(b.num));
+        let numsStr = nums.map(x=>x.num).join(' ');
+        html += `〖${cnt}次〗尾${tail}：${numsStr}（共计${nums.length}个）<br>`;
+      });
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  // 数字出现次数统计（原有功能）
+  const statArr = getSelectedNumsStat(selectedUsers);
+  html += `<div class="stat-title" style="margin-top:18px;">数字出现次数统计</div><div class="stat-list">`;
+  statArr.forEach(([count, nums]) => {
+    if (parseInt(count) === 0) return;
+    html += `〖${count}次〗${nums.join(' ')}（共计${nums.length}个）<br>`;
+  });
+  let zeroNums = statArr.find(([count]) => parseInt(count) === 0);
+  if (zeroNums && zeroNums[1].length > 0) {
+    html += `〖0次〗${zeroNums[1].join(' ')}（共计${zeroNums[1].length}个）<br>`;
+  }
+  html += `</div></div>`;
+  statPanel.innerHTML = html;
+}
+
+function parseAndRender() {
+  users = parseUserData(todayInput);
+  todayUsers = users;
+  numUserMap = buildNumUserMap(users);
+  todayNumUserMap = numUserMap;
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+
+window.onload = function() {
+  document.getElementById('historyPanel').style.display = 'none';
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+};
+let statOrderHighlightNum = null; // 高亮的数字
+
+
+// 3. 移除所有旧的面板 DOM（如 positionIntersectionPanel、adjacentPanel_4、adjacentPanel_8、adjacentPanel_12、interNumStatPanel、interSxStatPanel、interTailStatPanel、missingShengxiaoStatPanel、sameTailPairPanel、tailIntersectionPanel 等）
+document.addEventListener('DOMContentLoaded', function() {
+  [
+    'positionIntersectionPanel','adjacentPanel_4','adjacentPanel_8','adjacentPanel_12',
+    'interNumStatPanel','interSxStatPanel','interTailStatPanel',
+    'missingShengxiaoStatPanel','sameTailPairPanel','tailIntersectionPanel',
+    'adjacentPositionIntersectionPanel'
+  ].forEach(function(id){var p=document.getElementById(id);if(p)p.remove();});
+});
+document.getElementById('mainInput').addEventListener('input', function() {
+  if (mode === 'today') {
+    todayInput = this.value;
+    parseAndRender();
+  } else if (mode === 'history') {
+    historyInput = this.value;
+    parseHistoryUsersAndAutoSelect();
+  }
+});
+// ...existing code...
+
+// 新增：8码下用户用全某生肖的统计栏
+function renderShengxiaoFullStatPanel() {
+  const panelId = 'shengxiaoFullStatPanel';
+  let panel = document.getElementById(panelId);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = panelId;
+    panel.className = 'stat-panel';
+    document.querySelector('.container').appendChild(panel);
+  }
+  // 只在勾选8码时显示
+  const lens = getSelectedCodeLens();
+  if (!lens.includes(8)) {
+    panel.innerHTML = '';
+    return;
+  }
+  // 生肖到数字的映射
+  const shengxiaoNumsMap = {};
+  Object.entries(NUM_SHENGXIAO_MAP).forEach(([num, sx]) => {
+    if (!shengxiaoNumsMap[sx]) shengxiaoNumsMap[sx] = [];
+    shengxiaoNumsMap[sx].push(num);
+  });
+  // 升序
+  Object.values(shengxiaoNumsMap).forEach(arr => arr.sort((a,b)=>Number(a)-Number(b)));
+  // 统计
+  let result = [];
+  users.forEach(u => {
+    if (!u.nums8 || u.nums8.length !== 8) return;
+    let userNums = new Set(u.nums8);
+    let fullSx = [];
+    Object.entries(shengxiaoNumsMap).forEach(([sx, nums]) => {
+      if (nums.every(num => userNums.has(num))) {
+        fullSx.push({ sx, nums });
+      }
+    });
+    if (fullSx.length > 0) {
+      result.push({ name: u.name, fullSx });
+    }
+  });
+  // 渲染
+  let html = `<div class="stat-title" style="color:#00eaff;">8码中包含某生肖全部数字的用户统计</div>`;
+  if (result.length === 0) {
+    html += `<div style="color:#888;">无</div>`;
+  } else {
+    result.forEach(u => {
+      html += `<div style="margin-bottom:4px;"><span style="color:#ffb300;font-weight:bold;">${u.name}</span>：`;
+      u.fullSx.forEach(item => {
+        html += `<span style="color:#19e06e;margin-left:8px;">${item.sx}</span> (<span style="color:#fff;">${item.nums.join(' ')}</span>)`;
+      });
+      html += `</div>`;
+    });
+  }
+  panel.innerHTML = html;
+}
+
+// 在主流程中调用
+function parseAndRender() {
+  users = parseUserData(todayInput);
+  todayUsers = users;
+  numUserMap = buildNumUserMap(users);
+  todayNumUserMap = numUserMap;
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  renderShengxiaoFullStatPanel(); // 新增调用
+}
+
+window.onload = function() {
+  document.getElementById('historyPanel').style.display = 'none';
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  renderShengxiaoFullStatPanel(); // 新增调用
+};
+function renderQuickBtns() {
+  const quickBtns = document.getElementById('quickBtns');
+  let html = `
+    <div style="
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:10px 10px 8px 10px;
+      margin-bottom:10px;
+      width:100%;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    ">
+      <div style="display:flex;justify-content:center;align-items:center;gap:2px;">
+        ${[1,2,3].map(i => `
+        <div style="display:flex;align-items:center;gap:2px;">
+          <span style="color:#00eaff;font-size:13px;font-weight:bold;">${i}-</span>
+          <input id="end${i}" type="number" min="${i}" max="12" value="${i===1?5:i===2?9:12}" style="width:26px;font-size:12px;padding:1px 2px;border-radius:6px;">
+          <span style="color:#fff;font-size:13px;">位 ≥</span>
+          <input id="val${i}" type="number" min="1" max="99" value="3" style="width:26px;font-size:12px;padding:1px 2px;border-radius:6px;">
+          <span style="color:#fff;font-size:13px;">次</span>
+        </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:2px;margin-top:2px;">
+        ${[4,5,6].map(i => `
+        <div style="display:flex;align-items:center;gap:2px;">
+          <span style="color:#00eaff;font-size:13px;font-weight:bold;">${i}-</span>
+          <input id="end${i}" type="number" min="${i}" max="12" value="${i===4?8:i===5?10:12}" style="width:26px;font-size:12px;padding:1px 2px;border-radius:6px;">
+          <span style="color:#fff;font-size:13px;">位 ≥</span>
+          <input id="val${i}" type="number" min="1" max="99" value="3" style="width:26px;font-size:12px;padding:1px 2px;border-radius:6px;">
+          <span style="color:#fff;font-size:13px;">次</span>
+        </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:2px;margin-top:2px;">
+        ${[7,8,9].map(i => `
+        <div style="display:flex;align-items:center;gap:2px;">
+          <span style="color:#00eaff;font-size:13px;font-weight:bold;">${i}-</span>
+          <input id="end${i}" type="number" min="${i}" max="12" value="${i===7?12:i===8?12:12}" style="width:26px;font-size:12px;padding:1px 2px;border-radius:6px;">
+          <span style="color:#fff;font-size:13px;">位 ≥</span>
+          <input id="val${i}" type="number" min="1" max="99" value="3" style="width:26px;font-size:12px;padding:1px 2px;border-radius:6px;">
+          <span style="color:#fff;font-size:13px;">次</span>
+        </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="quick-btn" style="flex:1;" onclick="selectAllNums()">全勾选</button>
+        <button class="quick-btn" style="flex:1;" onclick="unselectAllNums()">全不选</button>
+        <button class="quick-btn" style="flex:1;" onclick="calcNineSectionIntersection()">九段交集</button>
+      </div>
+    </div>
+  `;
+  quickBtns.innerHTML = html;
+}
+function calcNineSectionIntersection() {
+  const selectedUsers = users;
+  if (!selectedUsers.length) {
+    alert('无用户数据');
+    return;
+  }
+
+  // 获取9组参数
+  const ends = Array.from({length:9}, (_,i) => parseInt(document.getElementById(`end${i+1}`).value, 10) || (i+1));
+  const vals = Array.from({length:9}, (_,i) => parseInt(document.getElementById(`val${i+1}`).value, 10) || 1);
+
+  // 统计每段出现次数
+  let posArr = Array(9).fill(0).map(()=>({}));
+  selectedUsers.forEach(u => {
+    for (let k = 0; k < 9; k++) {
+      for (let i = k; i < ends[k]; i++) {
+        let num = u.nums[i];
+        if (num) posArr[k][num] = (posArr[k][num]||0)+1;
+      }
+    }
+  });
+
+  // 每段出现阈值及以上的数字
+  let validArr = posArr.map((pos, idx) => Object.keys(pos).filter(num => pos[num] >= vals[idx]));
+
+  // 九段交集
+  let intersection = validArr.reduce((a, b) => a.filter(num => b.includes(num)));
+
+  // 统计所有相邻对交集
+  let allPossibleNums = [];
+  for (let n = 1; n <= 49; n++) allPossibleNums.push(n.toString().padStart(2, '0'));
+  let minLen = 12;
+  let intersectionArr = [];
+  for (let i = 0; i < minLen - 1; i++) {
+    let posA = [], posB = [];
+    selectedUsers.forEach(u => {
+      if (u.nums[i]) posA.push(u.nums[i]);
+      if (u.nums[i+1]) posB.push(u.nums[i+1]);
+    });
+    let setA = new Set(posA);
+    let setB = new Set(posB);
+    let inter = Array.from(setA).filter(x => setB.has(x));
+    intersectionArr.push(inter);
+  }
+  let allIntersectionNums = [];
+  intersectionArr.forEach(arr => { allIntersectionNums = allIntersectionNums.concat(arr); });
+  let uniqueNums = Array.from(new Set(allIntersectionNums));
+  let zeroNums = allPossibleNums.filter(num => !uniqueNums.includes(num));
+
+  // 九段交集结果里出现的0次数字
+  let intersectionFiltered = intersection.filter(num => !zeroNums.includes(num));
+  let notInIntersection = allPossibleNums.filter(num => !intersectionFiltered.includes(num));
+
+  // 统计所有交集数字出现次数（用于识别0次的数字）
+  let numCount = {};
+  uniqueNums.forEach(num => {
+    numCount[num] = 0;
+    intersectionArr.forEach(arr => {
+      if (arr.includes(num)) numCount[num]++;
+    });
+  });
+  zeroNums.forEach(num => { numCount[num] = 0; });
+
+  // 识别没交集成功且统计为0次的数字
+  let notInIntersectionZero = notInIntersection.filter(num => numCount[num] === 0);
+  let notInIntersectionNonZero = notInIntersection.filter(num => numCount[num] !== 0);
+
+  // 展示结果
+  let html = `
+    <div class="stat-panel" style="margin-top:12px;">
+      <div class="stat-title" style="color:#ff3b3b;">九段有效数字交集统计（可调节区间和阈值）</div>
+      <div style="font-size:12px;margin-bottom:4px;">
+        ${Array.from({length:9}, (_,i) => `
+          <b style="color:#00eaff;">${i+1}-${ends[i]}位≥${vals[i]}：</b> <span style="color:#fff;">${validArr[i].join(' ') || '无'}</span><br>
+        `).join('')}
+      </div>
+      <div style="font-size:14px;color:#00eaff;">
+        <b>九项交集：</b> 
+        ${intersectionFiltered.length ? `<span style="color:#ff3b3b;font-weight:bold;">${intersectionFiltered.join(' ')}</span>` : '<span style="color:#888;">无</span>'}
+      </div>
+      <div style="margin-top:10px;padding:8px 6px;background:#eaffea;border-radius:8px;">
+        <div style="color:#19e06e;font-size:13px;font-weight:bold;">九项交集未成功的数字：</div>
+        <div style="color:#19e06e;font-size:15px;font-weight:bold;">
+          ${notInIntersectionNonZero.length ? notInIntersectionNonZero.join(' ') : '<span style="color:#888;">无</span>'}
+        </div>
+      </div>
+      ${notInIntersectionZero.length ? `
+        <div style="margin-top:6px;padding:8px 6px;background:#fff0f0;border-radius:8px;">
+          <div style="color:#ff3b3b;font-size:13px;font-weight:bold;">九项交集未成功且统计为0次的数字：</div>
+          <div style="color:#ff3b3b;font-size:15px;font-weight:bold;">
+            ${notInIntersectionZero.join(' ')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  let panelId = 'nineSectionIntersectionPanel';
+  let panel = document.getElementById(panelId);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = panelId;
+    document.querySelector('.container').appendChild(panel);
+  }
+  panel.innerHTML = html;
+}
+</script>
+</body>
+</html>
